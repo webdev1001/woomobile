@@ -11,8 +11,6 @@ WooCommerce on the go. Access your shop anywhere on your iPhone.
 
 == Description ==
 
-* iPhone App coming soon
-
 WooMobile enables you to access your WooCommerce shop on the go using the WooMobile iPhone App - available in the App Store.
 
 = Features =
