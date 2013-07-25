@@ -1031,7 +1031,6 @@ if ( ! class_exists( 'WooMobile_XMLRPC' ) ) {
     			} else {
         			return false;
         		}
-
         	}
 
 		}
