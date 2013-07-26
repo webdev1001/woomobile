@@ -3,7 +3,7 @@
    Plugin Name: WooMobile
    Plugin URI: http://www.sudosystems.net.au/woomobile
    Description: WooMobile enables you to access your WooCommerce store on the go using the WooMoble iPhone App
-   Version: 1.0.1
+   Version: 1.0.2
    Author: Bowdie Mercieca
    Author URI: http://www.sudosystems.net.au
    Requires at least: 3.5
@@ -16,8 +16,8 @@
 
 if ( !defined( 'ABSPATH' ) ) exit;
 
-define('WOOMOBILE_BUILD', 101);
-define('WOOMOBILE_VERSION', '1.0.1' );
+define('WOOMOBILE_BUILD', 102);
+define('WOOMOBILE_VERSION', '1.0.2' );
 define('WOOMOBILE_PATH', realpath( dirname(__FILE__) ) );
 
 if ( ! class_exists( 'WooMobile_XMLRPC' ) ) {
@@ -672,7 +672,8 @@ if ( ! class_exists( 'WooMobile_XMLRPC' ) ) {
 			$items = $wpdb->get_results( "SELECT order_item_id AS ID,
 									      order_item_name AS title
 								      	  FROM " . $wpdb->prefix . "woocommerce_order_items
-								      	  WHERE order_id = $order_id 
+								      	  WHERE order_id = $order_id
+								      	  AND order_item_type = 'line_item' 
 								      	  ORDER BY ID ASC;" );
 
 			foreach( $items as $item ) {
@@ -1031,7 +1032,7 @@ if ( ! class_exists( 'WooMobile_XMLRPC' ) ) {
     			} else {
         			return false;
         		}
-        		
+
         	}
 
 		}
