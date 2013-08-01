@@ -3,7 +3,7 @@
    Plugin Name: WooMobile
    Plugin URI: http://www.sudosystems.net.au/woomobile
    Description: WooMobile enables you to access your WooCommerce store on the go using the WooMoble iPhone App
-   Version: 1.0.2
+   Version: 1.0.3
    Author: Bowdie Mercieca
    Author URI: http://www.sudosystems.net.au
    Requires at least: 3.5
@@ -16,8 +16,8 @@
 
 if ( !defined( 'ABSPATH' ) ) exit;
 
-define('WOOMOBILE_BUILD', 102);
-define('WOOMOBILE_VERSION', '1.0.2' );
+define('WOOMOBILE_BUILD', 103);
+define('WOOMOBILE_VERSION', '1.0.3' );
 define('WOOMOBILE_PATH', realpath( dirname(__FILE__) ) );
 
 if ( ! class_exists( 'WooMobile_XMLRPC' ) ) {
@@ -648,15 +648,33 @@ if ( ! class_exists( 'WooMobile_XMLRPC' ) ) {
 
 			global $wpdb;
 
-			$status = $wpdb->get_var( "SELECT TT.term_id AS status
-							       	   FROM $wpdb->term_taxonomy AS TT, 
-								       $wpdb->term_relationships AS TR
-							       	   WHERE TT.taxonomy = 'shop_order_status'
-							       	   AND TR.object_id = $order_id
-							       	   AND TT.term_taxonomy_id = TR.term_taxonomy_id;" );
+			$status = $wpdb->get_var( "SELECT T.name AS status
+							       	   FROM $wpdb->terms T,
+							       	   $wpdb->term_taxonomy TT,
+							       	   $wpdb->term_relationships TR
+							       	   WHERE TR.object_id = $order_id
+							       	   AND TT.taxonomy = 'shop_order_status'
+									   AND TT.term_id = T.term_id
+									   AND TR.term_taxonomy_id = TT.term_taxonomy_id;" );
 
-			return $status;
-
+			switch( $status ) {
+				case "pending":
+					return 6;
+				case "failed":
+					return 7;
+				case "on-hold":
+					return 8;
+				case "processing":
+					return 9;
+				case "completed":
+					return 10;
+				case "refunded":
+					return 11;
+				case "cancelled":
+					return 12;
+				default:
+					return 0;
+			}
 		}
 
 		/*

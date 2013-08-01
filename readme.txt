@@ -40,6 +40,9 @@ WooMobile will try to connect to your secure site first if available. If not, th
 
 == Changelog ==
 
+= 1.0.3 =
+Resolve incorrect status issue
+
 = 1.0.2 =
 Remove coupons and tax from order line items
 
