@@ -16,8 +16,8 @@ WooMobile enables you to access your WooCommerce shop on the go using the WooMob
 https://itunes.apple.com/us/app/woomobile/id674937453
 
 = Features =
-* View product descriptions, variations and images
 * View order status, contacts, products, notes and totals
+* View product descriptions, variations and images
 * View customer contacts details and previous orders
 * Search orders, products and customers
 * Minimal data utilisation
@@ -36,15 +36,21 @@ https://itunes.apple.com/us/app/woomobile/id674937453
 
 = Is WooMobile secure? =
 
-WooMobile will try to connect to your secure site first if available. If not, then it will fall back to an unsecured connection. WooMobile only shares data between your store and the iPhone App during operation.
+WooMobile will try to connect to your secure site first if available. If not, then it will fall back to an unsecured connection.
 
 == Changelog ==
 
+= 1.1 =
+* New functionality for upcoming WooMobile 1.1 iPhone App
+* Order update capabilities
+* Product custom field capabilities
+* Bug Fixes
+
 = 1.0.3 =
-Resolve incorrect status issue
+* Resolve incorrect status issue
 
 = 1.0.2 =
-Remove coupons and tax from order line items
+* Remove coupons and tax from order line items
 
 = 1.0.1 =
 * Remove drafts from products feed
