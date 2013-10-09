@@ -127,6 +127,17 @@ class WM_Orders {
 
 	}
 
+	function wm_order_number( $order_id ) {
+
+		$order_number = get_post_meta( $order_id, '_order_number', true );
+
+		if( $order_number )
+			return $order_number;
+
+		return $order_id;
+
+	}
+
 	/*
 	 * Parameters: order id (optional), full order (optional), offset (optional), limit (optional)
 	 * Build an array of orders  based on the provided parameters
@@ -162,16 +173,14 @@ class WM_Orders {
 
 			$order_output = array();
 
-			$order_output['ID']         = $order->ID;
-			$order_output['created']    = $order->post_date;
-			$order_output['customer']   = get_post_meta( $order->ID, '_customer_user', true );
-			$order_output['status']	    = $this->wm_order_status( $order->ID );
-			$order_output['first_name'] = get_post_meta( $order->ID, '_billing_first_name', true );
-			$order_output['last_name'] 	= get_post_meta( $order->ID, '_billing_last_name', true );
-			$order_output['total']      = get_post_meta( $order->ID, '_order_total', true );
-
-			if( $order_number = get_post_meta( $order->ID, '_order_number', true ) )
-					$order_output['order_number'] = $order_number;
+			$order_output['ID']         	= $order->ID;
+			$order_output['created']    	= $order->post_date;
+			$order_output['customer']   	= get_post_meta( $order->ID, '_customer_user', true );
+			$order_output['status']	    	= $this->wm_order_status( $order->ID );
+			$order_output['first_name'] 	= get_post_meta( $order->ID, '_billing_first_name', true );
+			$order_output['last_name'] 		= get_post_meta( $order->ID, '_billing_last_name', true );
+			$order_output['total']      	= get_post_meta( $order->ID, '_order_total', true );
+			$order_output['order_number'] 	= $this->wm_order_number( $order->ID );
 			
 			if( $full ) {
 
@@ -190,6 +199,7 @@ class WM_Orders {
 				$order_output['currency']         = get_post_meta( $order->ID, '_order_currency', true );
 				$order_output['items']            = $this->wm_order_items( $order->ID );
 				$order_output['comments']	      = $this->wm_order_comments( $order->ID );
+				$order_output['custom_fields']	  = $this->wm_order_custom_fields( $order->ID );
 
 				if( $order_tracking = $this->wm_order_tracking( $order->ID ) )
 					$order_output['tracking']	  = $order_tracking;
@@ -219,12 +229,20 @@ class WM_Orders {
 		// If the search term is numeric then it is possibly an order ID
 		// Otherwise perform some monsterous joins and LIKE searches to find matching orders
 		if( is_numeric( $search ) ) {
-			$orders = $wpdb->get_results( "SELECT ID
-										   FROM $wpdb->posts
-										   WHERE post_type = 'shop_order'
-										   AND ID = $search 
-										   ORDER BY post_date DESC
-										   LIMIT $limit OFFSET $offset;" );
+			$orders = $wpdb->get_results(  "SELECT post_id AS ID
+											FROM $wpdb->postmeta
+											WHERE meta_key = '_order_number'
+											AND meta_value = '$search'
+											LIMIT $limit OFFSET $offset;" );
+
+			if( !count( $orders ) ) {
+				$orders = $wpdb->get_results( "SELECT ID
+											   FROM $wpdb->posts
+											   WHERE post_type = 'shop_order'
+											   AND ID = $search 
+											   ORDER BY post_date DESC
+											   LIMIT $limit OFFSET $offset;" );
+			}
 		} else {
 			$orders = $wpdb->get_results( "	SELECT ID
 											FROM $wpdb->posts P
@@ -535,6 +553,55 @@ class WM_Orders {
 
 		return $shipping_address;
 
+	}
+
+	function wm_order_custom_fields( $order_id ) {
+
+		global $wpdb;
+
+		$fields_output = null; // Array to store final output
+
+		$fields = $wpdb->get_results( "SELECT meta_key, meta_value
+									   FROM $wpdb->postmeta
+									   WHERE post_id = $order_id
+									   AND meta_key NOT LIKE '\_%'
+									   ORDER BY meta_key ASC;" );
+
+		foreach ( $fields as $field )
+			$fields_output[$field->meta_key] = $field->meta_value;
+
+		return $fields_output;
+
+	}
+
+	function wm_order_status_count( $status = null ) {
+
+		global $wpdb;
+
+		if( $status != null ) {
+
+			$fields = $wpdb->get_results( "SELECT count(P.ID) AS total
+											FROM $wpdb->posts P,
+											$wpdb->terms T,
+											$wpdb->term_taxonomy TT,
+											$wpdb->term_relationships TR
+											WHERE P.post_type = 'shop_order'
+											AND P.post_status = 'publish'
+											AND T.name = '$status'
+											AND T.term_id = TT.term_id
+											AND TT.term_taxonomy_id = TR.term_taxonomy_id
+											AND TR.object_id = P.ID;" );
+
+		} else {
+
+			$fields = $wpdb->get_results( "SELECT count(ID) AS total
+											FROM $wpdb->posts
+											WHERE post_type = 'shop_order'
+											AND post_status = 'publish';" );
+
+		}
+
+		return intval( $fields[0]->total );
 	}
 }
 ?>

@@ -3,11 +3,11 @@
    Plugin Name: WooMobile
    Plugin URI: http://www.sudosystems.net.au/woomobile
    Description: WooMobile enables you to access your WooCommerce store on the go using the WooMoble iPhone App
-   Version: 1.1
+   Version: 1.2
    Author: Bowdie Mercieca
    Author URI: http://www.sudosystems.net.au
    Requires at least: 3.5
-   Tested up to: 3.5.2
+   Tested up to: 3.6.1
    License: GNU General Public License v3.0
    License URI: http://www.gnu.org/licenses/gpl-3.0.html
 
@@ -16,8 +16,8 @@
 
 if ( !defined( 'ABSPATH' ) ) exit;
 
-define('WOOMOBILE_BUILD', 110);
-define('WOOMOBILE_VERSION', '1.1' );
+define('WOOMOBILE_BUILD', 120);
+define('WOOMOBILE_VERSION', '1.2' );
 define('WOOMOBILE_PATH', realpath( dirname(__FILE__) ) );
 
 if ( ! class_exists( 'WooMobile_XMLRPC' ) ) {
@@ -55,6 +55,7 @@ if ( ! class_exists( 'WooMobile_XMLRPC' ) ) {
 			$methods['wm.getOrders'] 		= array( &$this, 'wm_getOrders' );
 			$methods['wm.getCustomer'] 		= array( &$this, 'wm_getCustomer' );
 			$methods['wm.getCustomers'] 	= array( &$this, 'wm_getCustomers' );
+			$methods['wm.getUpdates'] 		= array( &$this, 'wm_getUpdates' );
 			$methods['wm.updateOrder'] 		= array( &$this, 'wm_updateOrder' );
 			$methods['wm.newOrderNote'] 	= array( &$this, 'wm_newOrderNote' );
 			$methods['wm.searchProducts'] 	= array( &$this, 'wm_searchProducts' );
@@ -88,24 +89,53 @@ if ( ! class_exists( 'WooMobile_XMLRPC' ) ) {
 
 			$orders = new WM_Orders();
 
-			$store_info = array( 'woomobile_version'   => WOOMOBILE_VERSION,
-								 'woomobile_build'     => WOOMOBILE_BUILD,
-								 'woocommerce_version' => get_option( 'woocommerce_version' ),
-								 'wordpress_version'   => get_bloginfo( 'version' ),
-								 'wordpress_language'  => get_bloginfo( 'language' ),
-						    	 'store_title' 	  	   => get_bloginfo(),
-						    	 'store_tagline' 	   => get_bloginfo( 'tagline' ),
-						    	 'currency'			   => get_option( 'woocommerce_currency' ),
-						    	 'weight_unit'		   => get_option( 'woocommerce_weight_unit' ),
-						    	 'dimension_unit'	   => get_option( 'woocommerce_dimension_unit' ),
-						    	 'current_time' 	   => current_time( 'mysql' ),
-						    	 'order_statuses'	   => $orders->wm_order_statuses() );
+			$store_info = array( 'woomobile_version'   		=> WOOMOBILE_VERSION,
+								 'woomobile_build'     		=> WOOMOBILE_BUILD,
+								 'woocommerce_version' 		=> get_option( 'woocommerce_version' ),
+								 'wordpress_version'   		=> get_bloginfo( 'version' ),
+								 'wordpress_language'  		=> get_bloginfo( 'language' ),
+						    	 'store_title' 	  	   		=> get_bloginfo(),
+						    	 'store_tagline' 	   		=> get_bloginfo( 'tagline' ),
+						    	 'currency'			   		=> get_option( 'woocommerce_currency' ),
+						    	 'weight_unit'		   		=> get_option( 'woocommerce_weight_unit' ),
+						    	 'dimension_unit'	   		=> get_option( 'woocommerce_dimension_unit' ),
+						    	 'current_time' 	   		=> current_time( 'mysql' ),
+						    	 'order_statuses'	   		=> $orders->wm_order_statuses(),
+						    	 'orders_count_all'			=> $orders->wm_order_status_count(),
+								 'orders_count_processing' 	=> $orders->wm_order_status_count( 'processing' ) );
 
 			if( $tracking_providers = $orders->wm_order_tracking_providers() )
 				$store_info['tracking_providers'] = $tracking_providers;
 		
 			return $store_info;
 
+		}
+
+		/*
+		 * XML-RPC method: wm.getUpdates
+		 * Parameters: none
+		 * Provide a summary of changes to data
+		 */
+		function wm_getUpdates( $args ) {
+
+			// Sanitise user input
+			if( ! $args = $this->wm_validate_input( $args ) ) 
+				return null;
+
+			// Validate credentials
+			if( $validate_user_result = $this->wm_validate_user( $args ) )
+				return $validate_user_result;
+			
+			// Ensure correct number of parameters have been sent
+			if( count( $args ) < 3 )
+				return null;
+
+			$orders = new WM_Orders();
+
+			$updates = array( 	'orders_count_all'			=> $orders->wm_order_status_count(),
+								'orders_count_processing' 	=> $orders->wm_order_status_count( 'processing' ) );
+
+			return $updates;
 		}
 
 		/*

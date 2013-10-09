@@ -2,7 +2,7 @@
 Contributors: sudosystems
 Tags: iphone, ios, woocommerce, ecommerce, shop
 Requires at least: 3.5
-Tested up to: 3.5.2
+Tested up to: 3.6.1
 Stable tag: trunk
 License: GNU General Public License v3.0
 License URI: http://www.gnu.org/licenses/gpl-3.0.html
@@ -16,9 +16,12 @@ WooMobile enables you to access your WooCommerce shop on the go using the WooMob
 https://itunes.apple.com/us/app/woomobile/id674937453
 
 = Features =
-* View order status, contacts, products, notes and totals
+* Update/add order status, customer note, order notes and tracking information
+* View order status, contacts, products, notes, totals and custom fields
 * View product descriptions, variations and images
 * View customer contacts details and previous orders
+* Supports sequential order numbers
+* Provides iPhone Order notifications
 * Search orders, products and customers
 * Minimal data utilisation
 * Convenient access
@@ -39,6 +42,14 @@ https://itunes.apple.com/us/app/woomobile/id674937453
 WooMobile will try to connect to your secure site first if available. If not, then it will fall back to an unsecured connection.
 
 == Changelog ==
+
+= 1.2 =
+* Update for v1.2 of iPhone App
+* Support for sequential order numbers
+* Support for order custom fields
+* Support for background app refresh
+* Support for order notifications
+* Learned what the fox says
 
 = 1.1 =
 * New functionality for upcoming WooMobile 1.1 iPhone App
