@@ -3,21 +3,21 @@
    Plugin Name: WooMobile
    Plugin URI: http://www.sudosystems.net.au/woomobile
    Description: WooMobile enables you to access your WooCommerce store on the go using the WooMoble iPhone App
-   Version: 1.2
+   Version: 1.2.1
    Author: Bowdie Mercieca
    Author URI: http://www.sudosystems.net.au
    Requires at least: 3.5
-   Tested up to: 3.6.1
+   Tested up to: 3.8
    License: GNU General Public License v3.0
    License URI: http://www.gnu.org/licenses/gpl-3.0.html
 
-   Copyright: (c) 2013 Sudo Systems Integration & Consulting (support@sudosystems.net.au)
+   Copyright: (c) 2014 Sudo Systems Integration & Consulting (support@sudosystems.net.au)
    */
 
 if ( !defined( 'ABSPATH' ) ) exit;
 
-define('WOOMOBILE_BUILD', 120);
-define('WOOMOBILE_VERSION', '1.2' );
+define('WOOMOBILE_BUILD', 121);
+define('WOOMOBILE_VERSION', '1.2.1' );
 define('WOOMOBILE_PATH', realpath( dirname(__FILE__) ) );
 
 if ( ! class_exists( 'WooMobile_XMLRPC' ) ) {

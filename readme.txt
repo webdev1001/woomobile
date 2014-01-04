@@ -2,7 +2,7 @@
 Contributors: sudosystems
 Tags: iphone, ios, woocommerce, ecommerce, shop
 Requires at least: 3.5
-Tested up to: 3.6.1
+Tested up to: 3.8
 Stable tag: trunk
 License: GNU General Public License v3.0
 License URI: http://www.gnu.org/licenses/gpl-3.0.html
@@ -13,21 +13,20 @@ WooCommerce on the go. Access your shop anywhere on your iPhone.
 
 WooMobile enables you to access your WooCommerce shop on the go using the WooMobile iPhone App - available in the App Store.
 
-https://itunes.apple.com/us/app/woomobile/id674937453
+WooMobile: https://itunes.apple.com/us/app/woomobile/id674937453
+WooMobile Lite (free): https://itunes.apple.com/au/app/woomobile-lite/id722814030
 
 = Features =
-* Update/add order status, customer note, order notes and tracking information
-* View order status, contacts, products, notes, totals and custom fields
+* Update/add order status, customer note, order notes and tracking information (full version)
+* View order status, contacts, products, notes and totals
 * View product descriptions, variations and images
 * View customer contacts details and previous orders
-* Supports sequential order numbers
-* Provides iPhone Order notifications
 * Search orders, products and customers
 * Minimal data utilisation
 * Convenient access
 
 = Notes =
-* This plugin requires the purchase of the WooMobile iPhone App
+* This plugin requires the installation of WooMobile or WooMobile Lite iPhone App
 * You must have Shop Manager or Administrator privileges to use the App.
 
 == Installation ==
@@ -43,13 +42,14 @@ WooMobile will try to connect to your secure site first if available. If not, th
 
 == Changelog ==
 
+= 1.2.1 =
+* Support for Custom Status plugin
+* Bug Fixes
+* Required update for upcoming iPhone App version
+
 = 1.2 =
-* Update for v1.2 of iPhone App
 * Support for sequential order numbers
 * Support for order custom fields
-* Support for background app refresh
-* Support for order notifications
-* Learned what the fox says
 
 = 1.1 =
 * New functionality for upcoming WooMobile 1.1 iPhone App

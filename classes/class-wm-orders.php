@@ -110,8 +110,9 @@ class WM_Orders {
 
 		$old_status = $order->status;
 
-		if ( $new_status != $old_status )
+		if ( $new_status != $old_status ) {
 			$order->update_status( $new_status );
+		}
 
 		return null;
 
@@ -176,7 +177,8 @@ class WM_Orders {
 			$order_output['ID']         	= $order->ID;
 			$order_output['created']    	= $order->post_date;
 			$order_output['customer']   	= get_post_meta( $order->ID, '_customer_user', true );
-			$order_output['status']	    	= $this->wm_order_status( $order->ID );
+			$order_output['status']	    	= $this->wm_order_status_id( $order->ID );
+			$order_output['status_name']   	= $this->wm_order_status_name( $order->ID );
 			$order_output['first_name'] 	= get_post_meta( $order->ID, '_billing_first_name', true );
 			$order_output['last_name'] 		= get_post_meta( $order->ID, '_billing_last_name', true );
 			$order_output['total']      	= get_post_meta( $order->ID, '_order_total', true );
@@ -387,9 +389,32 @@ class WM_Orders {
 
 	/*
 	 * Parameters: order id
+	 * Returns an string value with the order status
+	 */
+	function wm_order_status_name( $order_id ) {
+
+		global $wpdb;
+
+		$status = $wpdb->get_var( "SELECT T.name AS status
+							       FROM $wpdb->terms T,
+							       $wpdb->term_taxonomy TT,
+							       $wpdb->term_relationships TR
+							       WHERE TR.object_id = $order_id
+							       AND TT.taxonomy = 'shop_order_status'
+								   AND TT.term_id = T.term_id
+								   AND TR.term_taxonomy_id = TT.term_taxonomy_id;" );
+
+		return $status;
+
+	}
+
+	/*
+	 * Deprecated as of v1.2.1
+	 *
+	 * Parameters: order id
 	 * Returns an integer value corresponding to the order status
 	 */
-	function wm_order_status( $order_id ) {
+	function wm_order_status_id( $order_id ) {
 
 		global $wpdb;
 
