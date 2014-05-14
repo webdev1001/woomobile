@@ -2,7 +2,7 @@
 Contributors: sudosystems
 Tags: iphone, ios, woocommerce, ecommerce, shop
 Requires at least: 3.5
-Tested up to: 3.8
+Tested up to: 3.9.1
 Stable tag: trunk
 License: GNU General Public License v3.0
 License URI: http://www.gnu.org/licenses/gpl-3.0.html
@@ -13,8 +13,8 @@ WooCommerce on the go. Access your shop anywhere on your iPhone.
 
 WooMobile enables you to access your WooCommerce shop on the go using the WooMobile iPhone App - available in the App Store. 
 
-WooMobile: https://itunes.apple.com/us/app/woomobile/id674937453
-WooMobile Lite (free): https://itunes.apple.com/au/app/woomobile-lite/id722814030
+* WooMobile: https://itunes.apple.com/us/app/woomobile/id674937453
+* WooMobile Lite (free): https://itunes.apple.com/us/app/woomobile-lite/id722814030
 
 = Features =
 * Update/add order status, customer note, order notes and tracking information (full version)
@@ -41,6 +41,11 @@ WooMobile Lite (free): https://itunes.apple.com/au/app/woomobile-lite/id72281403
 WooMobile will try to connect to your secure site first if available. If not, then it will fall back to an unsecured connection.
 
 == Changelog ==
+
+= 1.2.2 =
+* Fix: Shipping method not displaying correctly in WooCommerce 2.x
+* Fix: Some order item variations not displaying correctly
+* Add: Company name data to orders summary data
 
 = 1.2.1 =
 * Support for Custom Status plugin

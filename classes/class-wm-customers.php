@@ -21,7 +21,7 @@ class WM_Customers {
 	 * If $id is set to 0, an array of customers will be returned based on offset and limit
 	 * If $full is set to true, more detailed data will be returned - otherwise a summary will be returned
 	 */
-	function wm_build_customers( $id = 0, $full = false, $offset = 0, $limit = 10 ) {
+	function wm_build_customers( $id = 0, $full = false, $offset = 0, $limit = 10, $orderby = 'last_name' ) {
 		
 		global $wpdb;
 
@@ -30,7 +30,7 @@ class WM_Customers {
 		// Filter customers based on the provided arguments
 		$args = array( 'number'  => $limit, 
 					   'offset'  => $offset, 
-					   'orderby' => 'last_name', 
+					   'orderby' => $orderby, 
 					   'order'   => 'ASC', 
 					   'fields'  => array( 'ID',
 								  		   'user_login',
@@ -46,7 +46,7 @@ class WM_Customers {
 			$customers = $wpdb->get_results( "SELECT U.ID, U.user_login, U.user_email, U.user_registered
 										  	  FROM $wpdb->users U, $wpdb->usermeta UM
 										  	  WHERE U.ID = UM.user_id
-										  	  AND UM.meta_key = 'last_name'
+										  	  AND UM.meta_key = '" . $orderby . "'
 										  	  AND UM.meta_value != ''
 										  	  ORDER BY UM.meta_value
 										  	  LIMIT $limit OFFSET $offset;" );
@@ -66,6 +66,7 @@ class WM_Customers {
 			$customer_temp['ID'] 		 = $customer->ID;
 			$customer_temp['first_name'] = $customer_meta['first_name'][0];
 			$customer_temp['last_name']  = $customer_meta['last_name'][0];
+			$customer_temp['company'] 	 = $customer_meta['billing_company'][0];
 
 			$orders_output = $this->wm_customer_orders( $customer->ID );
 			
@@ -126,6 +127,7 @@ class WM_Customers {
 		$billing_address['first_name'] = $customer_meta['billing_first_name'][0];
 		$billing_address['first_name'] = $customer_meta['billing_first_name'][0];
 		$billing_address['last_name']  = $customer_meta['billing_last_name'][0];
+		$billing_address['company']    = $customer_meta['billing_company'][0];
 		$billing_address['address_1']  = $customer_meta['billing_address_1'][0];
 		$billing_address['city'] 	   = $customer_meta['billing_city'][0];
 		$billing_address['state'] 	   = $customer_meta['billing_state'][0];
@@ -148,6 +150,7 @@ class WM_Customers {
 
 		$shipping_address['first_name'] = $customer_meta['shipping_first_name'][0];
 		$shipping_address['last_name']  = $customer_meta['shipping_last_name'][0];
+		$shipping_address['company']    = $customer_meta['shipping_company'][0];
 		$shipping_address['address_1'] 	= $customer_meta['shipping_address_1'][0];
 		$shipping_address['city'] 		= $customer_meta['shipping_city'][0];
 		$shipping_address['state'] 		= $customer_meta['shipping_state'][0];

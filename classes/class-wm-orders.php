@@ -130,8 +130,11 @@ class WM_Orders {
 
 	function wm_order_number( $order_id ) {
 
-		$order_number = get_post_meta( $order_id, '_order_number', true );
+		$customer_po_number = get_post_meta( $order_id, 'Customer PO Number', true );
+		if( $customer_po_number )
+			return $customer_po_number;
 
+		$order_number = get_post_meta( $order_id, '_order_number', true );
 		if( $order_number )
 			return $order_number;
 
@@ -172,6 +175,9 @@ class WM_Orders {
 		// Iterate over each order and fetch additional meta data
 		foreach ( $orders as $order ) {
 
+			// Build order for complex fields to maintain compatibility with WooCommerce
+			$order_object = new WC_Order( $order->ID );
+
 			$order_output = array();
 
 			$order_output['ID']         	= $order->ID;
@@ -181,8 +187,9 @@ class WM_Orders {
 			$order_output['status_name']   	= $this->wm_order_status_name( $order->ID );
 			$order_output['first_name'] 	= get_post_meta( $order->ID, '_billing_first_name', true );
 			$order_output['last_name'] 		= get_post_meta( $order->ID, '_billing_last_name', true );
+			$order_output['company'] 		= get_post_meta( $order->ID, '_billing_company', true);
 			$order_output['total']      	= get_post_meta( $order->ID, '_order_total', true );
-			$order_output['order_number'] 	= $this->wm_order_number( $order->ID );
+			$order_output['order_number'] 	= (string)$this->wm_order_number( $order->ID );
 			
 			if( $full ) {
 
@@ -190,7 +197,7 @@ class WM_Orders {
 				$order_output['customer_note']    = $order->post_excerpt;
 				$order_output['billing_address']  = $this->wm_order_billing_address( $order->ID );
 				$order_output['shipping_address'] = $this->wm_order_shipping_address( $order->ID );
-				$order_output['shipping_method']  = get_post_meta( $order->ID, '_shipping_method_title', true );
+				$order_output['shipping_method']  = $order_object->get_shipping_method();
 				$order_output['payment_method']   = get_post_meta( $order->ID, '_payment_method_title', true );
 				$order_output['shipping_cost']    = get_post_meta( $order->ID, '_order_shipping', true );
 				$order_output['discount']         = get_post_meta( $order->ID, '_order_discount', true );
@@ -236,24 +243,30 @@ class WM_Orders {
 											WHERE meta_key = '_order_number'
 											AND meta_value = '$search'
 											LIMIT $limit OFFSET $offset;" );
+		}
 
-			if( !count( $orders ) ) {
-				$orders = $wpdb->get_results( "SELECT ID
-											   FROM $wpdb->posts
-											   WHERE post_type = 'shop_order'
-											   AND ID = $search 
-											   ORDER BY post_date DESC
-											   LIMIT $limit OFFSET $offset;" );
-			}
-		} else {
+		if( !count( $orders ) ) {
+			$orders = $wpdb->get_results( "SELECT ID
+										   FROM $wpdb->posts
+										   WHERE post_type = 'shop_order'
+										   AND ID = $search 
+										   ORDER BY post_date DESC
+										   LIMIT $limit OFFSET $offset;" );
+		}
+		
+		if( !count( $orders ) ) {
+
 			$orders = $wpdb->get_results( "	SELECT ID
 											FROM $wpdb->posts P
 											INNER JOIN $wpdb->postmeta PMBF ON P.ID = PMBF.post_id
 												AND PMBF.meta_key = '_billing_first_name'
 											INNER JOIN $wpdb->postmeta PMBL ON P.ID = PMBL.post_id
-													AND PMBL.meta_key = '_billing_last_name'
+												AND PMBL.meta_key = '_billing_last_name'
+											LEFT OUTER JOIN $wpdb->postmeta PMCP ON P.ID = PMCP.post_id
+												AND PMCP.meta_key = 'Customer PO Number'
 											WHERE PMBF.meta_value LIKE '" . $search . "'
 												OR PMBL.meta_value LIKE '" . $search . "'
+												OR PMCP.meta_value LIKE '%" . $search . "%'
 											ORDER BY P.post_date DESC
 											LIMIT $limit OFFSET $offset;" );
 		}
@@ -474,7 +487,7 @@ class WM_Orders {
 
 			$items_output[] = array(  'ID'           => $item->ID,
 									  'product_id'   => $item_meta['_product_id']->meta_value,
-									  'variations'   => $this->wm_order_item_variations( $item_meta ),
+									  'variations'   => $this->wm_order_item_variations( $item_meta, $item->ID ),
 								 	  'title'        => $item->title,
 								 	  'quantity'     => $item_meta['_qty']->meta_value, 
 								 	  'subtotal'     => $item_meta['_line_subtotal']->meta_value,
@@ -492,21 +505,47 @@ class WM_Orders {
 	 * Parameters: item meta data
 	 * Returns an array of variations for a given orders products variations
 	 */
-	function wm_order_item_variations( $item_meta ) {
+	function wm_order_item_variations( $item_meta, $item_id ) {
 
 		global $wpdb;
 
 		$variations_output = array();
+		$attribute_list = array();
 
 		$variation_id = $item_meta['_variation_id']->meta_value;
+
+		// Fetch variations that are stored in woocommerce_order_itemmeta (Woocommerce products created in version 2.0+)
+		$variations = $wpdb->get_results( "SELECT OIM.meta_key AS attribute, OIM.meta_value AS value
+										   FROM  {$wpdb->prefix}woocommerce_order_itemmeta OIM, {$wpdb->prefix}woocommerce_order_items OI
+										   WHERE OI.order_item_id = {$item_id}
+										   AND OIM.order_item_id = OI.order_item_id
+										   AND OIM.meta_key IN (
+											   SELECT REPLACE(meta_key, 'attribute_', '')
+											   FROM wp_postmeta
+											   WHERE meta_key LIKE 'attribute_%'
+											   AND post_id = {$variation_id});" );
+
+		foreach( $variations as $variation ) {
+
+			$variations_output[] = array( 'attribute' => $variation->attribute, 
+											  'value' => $variation->value );
+			$attribute_list[] = $variation->attribute;
+
+		}
+
+		// Fetch variations that are stored in postmeta (Woocommerce products created in version 1.6 and below)
 		$variations = $wpdb->get_results( "SELECT meta_key AS attribute, meta_value AS value
 										   FROM $wpdb->postmeta
 										   WHERE post_id = $variation_id
 										   AND meta_key LIKE 'attribute_%';");
 
 		foreach( $variations as $variation ) {
-			$variations_output[] = array( 'attribute' => str_replace( 'attribute_', '', $variation->attribute), 
+
+			// Variations can be stored in multiple places so drop any duplicates
+			if( !in_array( str_replace( 'attribute_', '', $variation->attribute), $attribute_list ) )
+				$variations_output[] = array( 'attribute' => str_replace( 'attribute_', '', $variation->attribute), 
 											  'value' => $variation->value );
+			
 		}
 
 		return $variations_output;

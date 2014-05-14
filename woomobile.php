@@ -3,11 +3,11 @@
    Plugin Name: WooMobile
    Plugin URI: http://www.sudosystems.net.au/woomobile
    Description: WooMobile enables you to access your WooCommerce store on the go using the WooMoble iPhone App
-   Version: 1.2.1
+   Version: 1.2.2
    Author: Bowdie Mercieca
    Author URI: http://www.sudosystems.net.au
    Requires at least: 3.5
-   Tested up to: 3.8
+   Tested up to: 3.9.1
    License: GNU General Public License v3.0
    License URI: http://www.gnu.org/licenses/gpl-3.0.html
 
@@ -16,8 +16,8 @@
 
 if ( !defined( 'ABSPATH' ) ) exit;
 
-define('WOOMOBILE_BUILD', 121);
-define('WOOMOBILE_VERSION', '1.2.1' );
+define('WOOMOBILE_BUILD', 122);
+define('WOOMOBILE_VERSION', '1.2.2' );
 define('WOOMOBILE_PATH', realpath( dirname(__FILE__) ) );
 
 if ( ! class_exists( 'WooMobile_XMLRPC' ) ) {
@@ -218,7 +218,7 @@ if ( ! class_exists( 'WooMobile_XMLRPC' ) ) {
 			$param_id = $args[3];
 			$retrieve_full = true;
 
-			return $customers->wm_build_customers( $param_id, $retrieve_full );
+			return $customers->wm_build_customers( $param_id, $retrieve_full, $sort);
 
 		}
 
@@ -299,13 +299,14 @@ if ( ! class_exists( 'WooMobile_XMLRPC' ) ) {
 			// Defaults if no parameters provided: offset = 0, limit = 10
 			$offset = ( count( $args ) >= 4 ) ? $args[3] : 0;
 			$limit = ( count( $args ) >= 5 ) ? $args[4] : 10;
+			$orderby = ( count( $args ) >= 6 ) ? $args[5] : 'last_name';
 
 			$customers = new WM_Customers();
 
 			$param_id = false;
 			$retrieve_full = false;
 
-			return $customers->wm_build_customers( $param_id, $retrieve_full, $offset, $limit );
+			return $customers->wm_build_customers( $param_id, $retrieve_full, $offset, $limit, $orderby );
 
 		}	
 
