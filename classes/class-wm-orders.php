@@ -519,11 +519,7 @@ class WM_Orders {
 										   FROM  {$wpdb->prefix}woocommerce_order_itemmeta OIM, {$wpdb->prefix}woocommerce_order_items OI
 										   WHERE OI.order_item_id = {$item_id}
 										   AND OIM.order_item_id = OI.order_item_id
-										   AND OIM.meta_key IN (
-											   SELECT REPLACE(meta_key, 'attribute_', '')
-											   FROM wp_postmeta
-											   WHERE meta_key LIKE 'attribute_%'
-											   AND post_id = {$variation_id});" );
+										   AND OIM.meta_key NOT LIKE '\_%';" );
 
 		foreach( $variations as $variation ) {
 
