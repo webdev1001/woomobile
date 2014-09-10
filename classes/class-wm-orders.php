@@ -120,11 +120,18 @@ class WM_Orders {
 
 	function wm_order_statuses() {
 
-		// Get a list of valid statuses
-		$args = array( 	'fields'  	 => 'names',
-						'hide_empty' => 0 );
 
-		return get_terms( 'shop_order_status', $args );
+		$wm_order_statuses = array();
+
+		$order_statuses_wc = wc_get_order_statuses();
+
+		foreach ($order_statuses_wc as $order_status_key_wc => $order_status_name_wc ) {
+			
+			$wm_order_statuses[] = str_replace( 'wc-', '', $order_status_key_wc );
+
+		}
+
+		return $wm_order_statuses;
 
 	}
 
@@ -162,6 +169,9 @@ class WM_Orders {
 					   'order' 			=> 'DESC', 
 					   'post_type' 		=> 'shop_order', 
 					   'post_status' 	=> 'publish' );
+
+		if( version_compare( WOOCOMMERCE_VERSION, '2.2.0' ) >= 0 )
+				$args['post_status'] = array_keys( wc_get_order_statuses() );
 		
 		// Return only 1 result if a particular order has been requested
 		if( $id )
@@ -183,8 +193,13 @@ class WM_Orders {
 			$order_output['ID']         	= $order->ID;
 			$order_output['created']    	= $order->post_date;
 			$order_output['customer']   	= get_post_meta( $order->ID, '_customer_user', true );
-			$order_output['status']	    	= $this->wm_order_status_id( $order->ID );
-			$order_output['status_name']   	= $this->wm_order_status_name( $order->ID );
+
+			if( version_compare( WOOCOMMERCE_VERSION, '2.2.0' ) >= 0 ) {
+				$order_output['status_name']   	= $order_object->get_status();
+			} else {
+				$order_output['status_name']   	= $order_object->status;
+			}
+
 			$order_output['first_name'] 	= get_post_meta( $order->ID, '_billing_first_name', true );
 			$order_output['last_name'] 		= get_post_meta( $order->ID, '_billing_last_name', true );
 			$order_output['company'] 		= get_post_meta( $order->ID, '_billing_company', true);
@@ -397,67 +412,6 @@ class WM_Orders {
 							 			 ORDER BY C.comment_ID DESC;" );
 
 		return $comments;
-
-	}
-
-	/*
-	 * Parameters: order id
-	 * Returns an string value with the order status
-	 */
-	function wm_order_status_name( $order_id ) {
-
-		global $wpdb;
-
-		$status = $wpdb->get_var( "SELECT T.name AS status
-							       FROM $wpdb->terms T,
-							       $wpdb->term_taxonomy TT,
-							       $wpdb->term_relationships TR
-							       WHERE TR.object_id = $order_id
-							       AND TT.taxonomy = 'shop_order_status'
-								   AND TT.term_id = T.term_id
-								   AND TR.term_taxonomy_id = TT.term_taxonomy_id;" );
-
-		return $status;
-
-	}
-
-	/*
-	 * Deprecated as of v1.2.1
-	 *
-	 * Parameters: order id
-	 * Returns an integer value corresponding to the order status
-	 */
-	function wm_order_status_id( $order_id ) {
-
-		global $wpdb;
-
-			$status = $wpdb->get_var( "SELECT T.name AS status
-							       	   FROM $wpdb->terms T,
-							       	   $wpdb->term_taxonomy TT,
-							       	   $wpdb->term_relationships TR
-							       	   WHERE TR.object_id = $order_id
-							       	   AND TT.taxonomy = 'shop_order_status'
-									   AND TT.term_id = T.term_id
-									   AND TR.term_taxonomy_id = TT.term_taxonomy_id;" );
-
-			switch( $status ) {
-				case "pending":
-					return 6;
-				case "failed":
-					return 7;
-				case "on-hold":
-					return 8;
-				case "processing":
-					return 9;
-				case "completed":
-					return 10;
-				case "refunded":
-					return 11;
-				case "cancelled":
-					return 12;
-				default:
-					return 0;
-			}
 
 	}
 

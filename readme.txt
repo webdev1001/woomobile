@@ -2,7 +2,7 @@
 Contributors: sudosystems
 Tags: iphone, ios, woocommerce, ecommerce, shop
 Requires at least: 3.5
-Tested up to: 3.9.1
+Tested up to: 4.0
 Stable tag: trunk
 License: GNU General Public License v3.0
 License URI: http://www.gnu.org/licenses/gpl-3.0.html
@@ -33,6 +33,7 @@ WooMobile enables you to access your WooCommerce shop on the go using the WooMob
 
 1. Install WooMobile either via the WordPress.org plugin directory, or by uploading the files to your server
 2. Activate the plugin
+3. That's it - login and enjoy!
 
 == Frequently asked questions ==
 
@@ -41,6 +42,9 @@ WooMobile enables you to access your WooCommerce shop on the go using the WooMob
 WooMobile will try to connect to your secure site first if available. If not, then it will fall back to an unsecured connection.
 
 == Changelog ==
+
+= 1.2.3 =
+* Update: Support for WooCommerce 2.2
 
 = 1.2.2 =
 * Fix: Shipping method not displaying correctly in WooCommerce 2.x
