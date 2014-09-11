@@ -43,6 +43,9 @@ WooMobile will try to connect to your secure site first if available. If not, th
 
 == Changelog ==
 
+= 1.2.4 =
+* Fix: Status update issues
+
 = 1.2.3 =
 * Update: Support for WooCommerce 2.2
 

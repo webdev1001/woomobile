@@ -120,18 +120,26 @@ class WM_Orders {
 
 	function wm_order_statuses() {
 
+		if( version_compare( WOOCOMMERCE_VERSION, '2.2.0' ) >= 0 ) {
 
-		$wm_order_statuses = array();
+			$wm_order_statuses = array();
 
-		$order_statuses_wc = wc_get_order_statuses();
+			$order_statuses_wc = wc_get_order_statuses();
 
-		foreach ($order_statuses_wc as $order_status_key_wc => $order_status_name_wc ) {
-			
-			$wm_order_statuses[] = str_replace( 'wc-', '', $order_status_key_wc );
+			foreach ($order_statuses_wc as $order_status_key_wc => $order_status_name_wc )
+				$wm_order_statuses[] = str_replace( 'wc-', '', $order_status_key_wc );
 
-		}
+			return $wm_order_statuses;
 
-		return $wm_order_statuses;
+		} else {
+
+			// Get a list of valid statuses
+			$args = array( 	'fields'  	 => 'names',
+							'hide_empty' => 0 );
+
+			return get_terms( 'shop_order_status', $args );
+
+		}	
 
 	}
 
@@ -594,24 +602,34 @@ class WM_Orders {
 
 		if( $status != null ) {
 
-			$fields = $wpdb->get_results( "SELECT count(P.ID) AS total
-											FROM $wpdb->posts P,
-											$wpdb->terms T,
-											$wpdb->term_taxonomy TT,
-											$wpdb->term_relationships TR
-											WHERE P.post_type = 'shop_order'
-											AND P.post_status = 'publish'
-											AND T.name = '$status'
-											AND T.term_id = TT.term_id
-											AND TT.term_taxonomy_id = TR.term_taxonomy_id
-											AND TR.object_id = P.ID;" );
+			if( version_compare( WOOCOMMERCE_VERSION, '2.2.0' ) >= 0 ) {
+
+				$fields = $wpdb->get_results( "SELECT count({$wpdb->posts}.ID) AS total
+											   FROM {$wpdb->posts}
+											   WHERE {$wpdb->posts}.post_type = 'shop_order'
+											   AND {$wpdb->posts}.post_status = 'wc-{$status}';" );
+
+			} else {
+
+				$fields = $wpdb->get_results( "SELECT count(P.ID) AS total
+												FROM $wpdb->posts P,
+												$wpdb->terms T,
+												$wpdb->term_taxonomy TT,
+												$wpdb->term_relationships TR
+												WHERE P.post_type = 'shop_order'
+												AND P.post_status = 'publish'
+												AND T.name = '$status'
+												AND T.term_id = TT.term_id
+												AND TT.term_taxonomy_id = TR.term_taxonomy_id
+												AND TR.object_id = P.ID;" );
+
+			}
 
 		} else {
 
 			$fields = $wpdb->get_results( "SELECT count(ID) AS total
 											FROM $wpdb->posts
-											WHERE post_type = 'shop_order'
-											AND post_status = 'publish';" );
+											WHERE post_type = 'shop_order';" );
 
 		}
 
